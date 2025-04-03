@@ -1,32 +1,35 @@
-service: nodeless # NOTE: update this with your service name
+service: nodeless
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs20.x
   region: sa-east-1
   memorySize: 256
+  timeout: 30
+  environment:
+    BUCKET_NAME: yourBucket
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:GetObject
         - s3:PutObject
       Resource:
-        - "arn:aws:s3:::*"
+        - "arn:aws:s3:::yourBucket/*"
 
 functions:
   optimize:
     handler: optimize.handle
     environment:
-      bucket: #yourBucket
+      bucket: ${env:BUCKET_NAME}
     events:
       - s3:
-          bucket: #yourBucket
+          bucket: ${env:BUCKET_NAME}
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploads/
             - suffix: .jpg
       - s3:
-          bucket: #yourBucket
+          bucket: ${env:BUCKET_NAME}
           event: s3:ObjectCreated:*
           rules:
             - prefix: uploads/
